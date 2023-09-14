@@ -1,0 +1,62 @@
+name: Build & Publish Image to ECR
+
+on:
+  # push:
+  #   branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: Branch to build from
+        default: main
+        required: true
+
+env:
+  ECR_REPO: oicd-test
+
+jobs:
+  build_image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch_name }}
+
+      - name: Collect Remote Head
+        id: git_hash_collector
+        run: |
+          GIT_HASH=$(git rev-parse HEAD)
+          echo HASH=${GIT_HASH:0:7} >> $GITHUB_ENV
+          echo "HASH=${GIT_HASH:0:7}" >> $GITHUB_OUTPUT
+          echo "ECR_REPO=${{ env.ECR_REPO }}" >> $GITHUB_OUTPUT
+
+      - name: Build Docker Image
+        env:
+          IMAGE_TAG: ${{ env.HASH }}
+        run: |
+          docker build --file Dockerfile -t $IMAGE_TAG .
+          docker save -o /tmp/$IMAGE_TAG.tar $IMAGE_TAG
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.HASH }}
+          path: /tmp/${{ env.HASH }}.tar
+          retention-days: 1
+    outputs:
+      HASH: ${{ steps.git_hash_collector.outputs.HASH }}
+      ECR_REPO: ${{ steps.git_hash_collector.outputs.ECR_REPO }}
+
+
+  dev_ecr_publish:
+    needs: build_image
+    # if: github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/ecr.yml
+    with:
+      branch_name: ${{ github.event.inputs.branch_name }}
+      build_env: dev
+      AWS_REGION: ${{ vars.DEV_AWS_REGION }}
+      ROLE_ARN: ${{ vars.DEV_ROLE_ARN }}
+      IMAGE_TAG: ${{ needs.build_image.outputs.HASH }}
+      REPOSITORY: ${{ needs.build_image.outputs.ECR_REPO }}
+

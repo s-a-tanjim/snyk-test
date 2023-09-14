@@ -30,7 +30,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --severity-threshold=high
+          args: --severity-threshold=low
 
       - name: Build a Docker image
         run: docker build --file test.dockerfile -t test-img .

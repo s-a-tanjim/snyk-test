@@ -44,7 +44,7 @@ jobs:
         with:
           image: test-img
           args: --file=test.dockerfile
-          sarif: false
+          # sarif: false
       
       - name: Upload result to GitHub Code Scanning
         continue-on-error: true

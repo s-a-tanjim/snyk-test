@@ -15,17 +15,22 @@ on:
 jobs:
   test_snyk:
     runs-on: ubuntu-latest
-    permissions:
-      # required for all workflows
-      security-events: write
-      # only required for workflows in private repositories
-      actions: read
-      contents: read
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.branch_name }}
+
+      
+      - name: Run Snyk to check for vulnerabilities
+        id: snyk-scan-maven
+        continue-on-error: true
+        uses: snyk/actions/maven@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
 
       - name: Build a Docker image
         run: docker build --file test.dockerfile -t test-img .
@@ -39,9 +44,10 @@ jobs:
         with:
           image: test-img
           args: --file=test.dockerfile
-          sarif: false
+          # sarif: false
       
       - name: Upload result to GitHub Code Scanning
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: snyk.sarif

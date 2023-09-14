@@ -15,7 +15,6 @@
     <description>Notification Service</description>
     <properties>
         <java.version>17</java.version>
-        <net.provenant.origin.events.messagecontract.version>0.0.1-SNAPSHOT</net.provenant.origin.events.messagecontract.version>
     </properties>
     <dependencies>
         <dependency>
@@ -85,11 +84,6 @@
             <version>1.6.12</version>
         </dependency>
         <dependency>
-            <groupId>net.provenant.origin.events.messagecontract</groupId>
-            <artifactId>message-contract</artifactId>
-            <version>${net.provenant.origin.events.messagecontract.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
@@ -115,15 +109,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <!-- Private Repository -->
-        <repository>
-            <id>github-creds</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/provenant-dev/*</url>
-        </repository>
-        <!-- Private Repository Ends -->
-    </repositories>
-
 </project>

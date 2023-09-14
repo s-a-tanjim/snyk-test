@@ -1,6 +1,8 @@
 name: Snyk Test
 
 on:
+  pull_request:
+    branches: [ "main" ]
   # push:
   #   branches: [ "main" ]
   workflow_dispatch:
@@ -13,6 +15,12 @@ on:
 jobs:
   test_snyk:
     runs-on: ubuntu-latest
+    permissions:
+      # required for all workflows
+      security-events: write
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3

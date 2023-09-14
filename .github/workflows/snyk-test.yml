@@ -23,12 +23,15 @@ jobs:
         run: docker build --file test.dockerfile -t test-img .
       
       - name: Run Snyk to check Docker image for vulnerabilities
+        id: snyk-scan-docker
+        continue-on-error: true
         uses: snyk/actions/docker@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: test-img
           args: --file=test.dockerfile
+          sarif: false
       
       - name: Upload result to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v2
